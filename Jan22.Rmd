@@ -22,4 +22,7 @@ sem.model.syntax <- 'Performance ~ Risk'
 sem.model <- sem(sem.model.syntax, data = ENT5587.df)
 parameterEstimates(sem.model)
 ```
+```{r}
+summary(reg.model)
+```
 
