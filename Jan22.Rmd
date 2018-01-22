@@ -1,0 +1,25 @@
+---
+title: "Jan22"
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(readr)
+library(skimr)
+
+ENT5587.df <- read_csv("http://www.drbanderson.com/data/ENT5587C_Spring2018.csv")
+skim(ENT5587.df, DYN1:DYN4)
+```
+
+```{r}
+reg.model <- lm(Performance ~ Risk, data = ENT5587.df)
+summary(reg.model)$coef
+```
+
+```{r}
+library(lavaan)
+sem.model.syntax <- 'Performance ~ Risk'
+sem.model <- sem(sem.model.syntax, data = ENT5587.df)
+parameterEstimates(sem.model)
+```
+
