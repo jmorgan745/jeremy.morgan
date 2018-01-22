@@ -25,4 +25,16 @@ parameterEstimates(sem.model)
 ```{r}
 summary(reg.model)
 ```
+```{r}
+risk.model.syntax <- '
+  # Measurement model
+  RiskTaking =~ RISK1 + RISK2 + RISK3
+  Performance =~ PERF2 + PERF3 + PERF4 + PERF5
+
+  # Structural model
+  Performance ~ RiskTaking'
+
+risk.model <- sem(risk.model.syntax, data = ENT5587.df)
+parameterEstimates(risk.model)
+```
 
