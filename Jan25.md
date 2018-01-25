@@ -12,7 +12,7 @@ Testing an hypothesis using SEM.
 -   Import Data, Load Our Data --- DONE
 -   Specify Model Equation --- DONE
 -   Evaluated Variables --- DONE
--   Variable and Initial Model Visualization
+-   Variable and Initial Model Visualization --- DONE (but only for Innovativeness and Performance)
 -   Specify SEM Workflow
     -   Specify Model Syntax and Check With Equation
 -   Run the Model
@@ -148,3 +148,16 @@ skim(Lab2data.df)
     ##    25 ▃▃▇▆▆▂▂▁
     ##     7 ▁▂▃▇▇▆▅▂
     ##     7 ▁▁▂▇▅▃▃▁
+
+------------------------------------------------------------------------
+
+### Variable and initial model visualizations
+
+Focusing only on innovativeness and performance but should be done with all three predictors against performance.
+
+``` r
+qplot(Innovativeness, Performance, data = Lab2data.df,
+      geom = c("point", "smooth"))
+```
+
+![](Jan25_files/figure-markdown_github/unnamed-chunk-4-1.png)
