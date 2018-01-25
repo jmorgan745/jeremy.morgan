@@ -14,3 +14,10 @@ Testing an hypothesis using SEM.
 -   Evaluated Variables
 -   Variable and Initial Model Visualization
 -   Specify SEM Workflow
+-   Specify Model Syntax and Check With Equation
+-   Run the Model
+-   Model Rubustness Checks
+-   Chi-squared
+-   Modification Indicies
+-   (Lamda Loadings)
+-   Create Results Table
