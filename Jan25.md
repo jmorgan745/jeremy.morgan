@@ -16,10 +16,10 @@ Testing an hypothesis using SEM.
 -   Specify SEM Workflow
     -   Specify Model Syntax and Check With Equation
 -   Run the Model
--   Model Rubustness Checks
+-   Model Robustness Checks
     -   Chi-squared
-    -   Modification Indicies
-    -   (Lamda Loadings)
+    -   Modification Indices
+    -   (Lambda Loadings)
 -   Create Results Table
 
 ------------------------------------------------------------------------
@@ -99,3 +99,9 @@ head(Lab2data.ds, 10)
     ## 8  5.333334       15.25
     ## 9  3.000000       13.25
     ## 10 5.000000       13.50
+
+------------------------------------------------------------------------
+
+### Specify model equation
+
+*P**e**r**f**o**r**m**a**n**c**e* = *α* + *β*<sub>*I**n**n**o**v**a**t**i**v**e**n**e**s**s*</sub> + *β*<sub>*P**r**o**a**c**t**i**v**e**n**e**s**s*</sub> + *β*<sub>*R**i**s**k**T**a**k**i**n**g*</sub> + *ϵ*
