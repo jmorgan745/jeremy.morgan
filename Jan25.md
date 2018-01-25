@@ -4,3 +4,13 @@ Lab 2
 Testing an hypothesis using SEM.
 
 > Innovativeness, Proactively, and Risktaking Jointly and Positively Influence Firm Performance
+
+### Project Tasks
+
+-   Figure out SEM
+-   Two spaces do this, SEM stands for SEM
+-   Import Data, Load Our Data
+-   Specify Model Equation
+-   Evaluated Variables
+-   Variable and Initial Model Visualization
+-   Specify SEM Workflow
