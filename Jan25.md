@@ -10,8 +10,8 @@ Testing an hypothesis using SEM.
 -   Figure out SEM
     -   Four spaces do this, SEM stands for SEM --- DONE
 -   Import Data, Load Our Data --- DONE
--   Specify Model Equation
--   Evaluated Variables
+-   Specify Model Equation --- DONE
+-   Evaluated Variables --- DONE
 -   Variable and Initial Model Visualization
 -   Specify SEM Workflow
     -   Specify Model Syntax and Check With Equation
@@ -105,3 +105,46 @@ head(Lab2data.ds, 10)
 ### Specify model equation
 
 *P**e**r**f**o**r**m**a**n**c**e* = *α* + *β*<sub>*I**n**n**o**v**a**t**i**v**e**n**e**s**s*</sub> + *β*<sub>*P**r**o**a**c**t**i**v**e**n**e**s**s*</sub> + *β*<sub>*R**i**s**k**T**a**k**i**n**g*</sub> + *ϵ*
+
+------------------------------------------------------------------------
+
+### Evaluation variables
+
+``` r
+# create the innovativeness, proactiveness, and risk taking variables and select only varibles I need
+
+Lab2data.df <- Lab2data.ds %>%
+  mutate(Innovativeness = (INN2+INN2+INN3) / 3,
+         Proactiveness = (PRO1+PRO2+PRO3) / 3,
+         RiskTaking = (RISK1+RISK2+RISK3) / 3) %>%
+  select(FirmID, Performance, Innovativeness, Proactiveness, RiskTaking)
+```
+
+Next we evaluate the distribution of the variables
+
+``` r
+library(skimr)
+skim(Lab2data.df)
+```
+
+    ## Skim summary statistics
+    ##  n obs: 294 
+    ##  n variables: 5 
+    ## 
+    ## Variable type: integer 
+    ##  variable missing complete   n   mean     sd p0   p25 median    p75 p100
+    ##    FirmID       0      294 294 303.68 177.71  1 155.5  310.5 460.75  608
+    ##      hist
+    ##  ▇▆▇▅▆▆▇▆
+    ## 
+    ## Variable type: numeric 
+    ##        variable missing complete   n  mean   sd   p0  p25 median   p75
+    ##  Innovativeness       0      294 294  4.41 1.34 1    3.67   4.33  5.33
+    ##     Performance       0      294 294 11.92 4.5  3.25 9     11.5  15   
+    ##   Proactiveness       0      294 294  4.55 1.11 1.33 4      4.67  5.33
+    ##      RiskTaking       0      294 294  4.3  1.17 1    3.67   4.33  5   
+    ##  p100     hist
+    ##     7 ▁▁▁▇▃▅▃▂
+    ##    25 ▃▃▇▆▆▂▂▁
+    ##     7 ▁▂▃▇▇▆▅▂
+    ##     7 ▁▁▂▇▅▃▃▁
