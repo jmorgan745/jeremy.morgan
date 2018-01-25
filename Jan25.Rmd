@@ -19,9 +19,9 @@ Testing an hypothesis using SEM.
 * Specify Model Equation --- DONE
 * Evaluated Variables --- DONE
 * Variable and Initial Model Visualization --- DONE (but only for Innovativeness and Performance)
-* Specify SEM Workflow
+* Specify SEM Workflow --- DONE
     * Specify Model Syntax and Check With Equation
-* Run the Model
+* Run the Model --- DONE
 * Model Robustness Checks
     * Chi-squared
     * Modification Indices
