@@ -52,7 +52,7 @@ $Performance=\alpha+\beta_{Innovativeness}+\beta_{Proactiveness}+\beta_{RiskTaki
 # create the innovativeness, proactiveness, and risk taking variables and select only varibles I need
 
 Lab2data.df <- Lab2data.ds %>%
-  mutate(Innovativeness = (INN2+INN2+INN3) / 3,
+  mutate(Innovativeness = (INN1+INN2+INN3) / 3,
          Proactiveness = (PRO1+PRO2+PRO3) / 3,
          RiskTaking = (RISK1+RISK2+RISK3) / 3) %>%
   select(FirmID, Performance, Innovativeness, Proactiveness, RiskTaking)
@@ -73,5 +73,20 @@ Focusing only on innovativeness and performance but should be done with all thre
 ```{r}
 qplot(Innovativeness, Performance, data = Lab2data.df,
       geom = c("point", "smooth"))
+```
+
+***
+### Specify model syntax and run model
+```{r}
+library(lavaan)
+
+#Specify model syntax
+perf.model.syntax <- 'Performance ~ Innovativeness + Proactiveness + RiskTaking'
+
+#run the model
+perf.model <- sem(perf.model.syntax, data=Lab2data.df)
+
+#display model results
+summary(perf.model)
 ```
 

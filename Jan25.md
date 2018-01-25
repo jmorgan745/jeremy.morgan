@@ -114,7 +114,7 @@ head(Lab2data.ds, 10)
 # create the innovativeness, proactiveness, and risk taking variables and select only varibles I need
 
 Lab2data.df <- Lab2data.ds %>%
-  mutate(Innovativeness = (INN2+INN2+INN3) / 3,
+  mutate(Innovativeness = (INN1+INN2+INN3) / 3,
          Proactiveness = (PRO1+PRO2+PRO3) / 3,
          RiskTaking = (RISK1+RISK2+RISK3) / 3) %>%
   select(FirmID, Performance, Innovativeness, Proactiveness, RiskTaking)
@@ -139,12 +139,12 @@ skim(Lab2data.df)
     ## 
     ## Variable type: numeric 
     ##        variable missing complete   n  mean   sd   p0  p25 median   p75
-    ##  Innovativeness       0      294 294  4.41 1.34 1    3.67   4.33  5.33
+    ##  Innovativeness       0      294 294  4.58 1.14 1    4      4.67  5.33
     ##     Performance       0      294 294 11.92 4.5  3.25 9     11.5  15   
     ##   Proactiveness       0      294 294  4.55 1.11 1.33 4      4.67  5.33
     ##      RiskTaking       0      294 294  4.3  1.17 1    3.67   4.33  5   
     ##  p100     hist
-    ##     7 ▁▁▁▇▃▅▃▂
+    ##     7 ▁▁▃▇▇▇▃▃
     ##    25 ▃▃▇▆▆▂▂▁
     ##     7 ▁▂▃▇▇▆▅▂
     ##     7 ▁▁▂▇▅▃▃▁
@@ -161,3 +161,45 @@ qplot(Innovativeness, Performance, data = Lab2data.df,
 ```
 
 ![](Jan25_files/figure-markdown_github/unnamed-chunk-4-1.png)
+
+------------------------------------------------------------------------
+
+### Specify model syntax and run model
+
+``` r
+library(lavaan)
+
+#Specify model syntax
+perf.model.syntax <- 'Performance ~ Innovativeness + Proactiveness + RiskTaking'
+
+#run the model
+perf.model <- sem(perf.model.syntax, data=Lab2data.df)
+
+#display model results
+summary(perf.model)
+```
+
+    ## lavaan (0.5-23.1097) converged normally after  24 iterations
+    ## 
+    ##   Number of observations                           294
+    ## 
+    ##   Estimator                                         ML
+    ##   Minimum Function Test Statistic                0.000
+    ##   Degrees of freedom                                 0
+    ##   Minimum Function Value               0.0000000000000
+    ## 
+    ## Parameter Estimates:
+    ## 
+    ##   Information                                 Expected
+    ##   Standard Errors                             Standard
+    ## 
+    ## Regressions:
+    ##                    Estimate  Std.Err  z-value  P(>|z|)
+    ##   Performance ~                                       
+    ##     Innovativeness    0.400    0.283    1.415    0.157
+    ##     Proactiveness     0.053    0.324    0.163    0.871
+    ##     RiskTaking        0.290    0.291    0.996    0.319
+    ## 
+    ## Variances:
+    ##                    Estimate  Std.Err  z-value  P(>|z|)
+    ##    .Performance      19.603    1.617   12.124    0.000
