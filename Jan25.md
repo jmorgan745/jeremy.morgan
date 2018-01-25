@@ -8,18 +8,18 @@ Testing an hypothesis using SEM.
 ### Project Tasks
 
 -   Figure out SEM
--   Two spaces do this, SEM stands for SEM --- DONE
+    -   Two spaces do this, SEM stands for SEM --- DONE
 -   Import Data, Load Our Data --- DONE
 -   Specify Model Equation
 -   Evaluated Variables
 -   Variable and Initial Model Visualization
 -   Specify SEM Workflow
--   Specify Model Syntax and Check With Equation
+    -   Specify Model Syntax and Check With Equation
 -   Run the Model
 -   Model Rubustness Checks
--   Chi-squared
--   Modification Indicies
--   (Lamda Loadings)
+    -   Chi-squared
+    -   Modification Indicies
+    -   (Lamda Loadings)
 -   Create Results Table
 
 ------------------------------------------------------------------------
