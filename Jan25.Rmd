@@ -14,8 +14,8 @@ Testing an hypothesis using SEM.
 ### Project Tasks
 
 * Figure out SEM
-  * Two spaces do this, SEM stands for SEM
-* Import Data, Load Our Data
+  * Two spaces do this, SEM stands for SEM --- DONE
+* Import Data, Load Our Data --- DONE
 * Specify Model Equation
 * Evaluated Variables
 * Variable and Initial Model Visualization
@@ -27,3 +27,15 @@ Testing an hypothesis using SEM.
   * Modification Indicies
   * (Lamda Loadings)
 * Create Results Table
+
+***
+
+### Load our data
+
+```{r}
+# Access the course data from drbanderson.com
+library(tidyverse)
+Lab2data.ds <- read.csv("http://www.drbanderson.com/data/ENT5587C_Spring2018.csv")
+head(Lab2data.ds, 10)
+```
+
