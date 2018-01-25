@@ -14,7 +14,7 @@ Testing an hypothesis using SEM.
 ### Project Tasks
 
 * Figure out SEM
-    * Two spaces do this, SEM stands for SEM --- DONE
+    * Four spaces do this, SEM stands for SEM --- DONE
 * Import Data, Load Our Data --- DONE
 * Specify Model Equation
 * Evaluated Variables
