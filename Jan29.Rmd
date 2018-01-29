@@ -20,3 +20,47 @@ library(psych)
 alpha(risk.corr.df)
 ```
 
+```{r}
+library(lavaan)
+id.problem.syntax <- 'Risk =~ RISK1 + RISK2 + RISK3'
+id.problem.model <- sem(id.problem.syntax, data = ENT5587.df)
+summary(id.problem.model)
+```
+
+```{r}
+library(skimr)
+olc.df <- ENT5587.df %>% 
+  dplyr::select(OL1:OL19)
+skim(olc.df)
+```
+
+```{r}
+library(lavaan)
+olc.cfa.syntax <- 'OLC =~ OL1 + OL2 + OL3 + OL4 + OL5 + OL6 + OL7 + OL8 + OL9 + OL10 +
+                          OL11 + OL12 + OL13 + OL14 + OL15 + OL16 + OL17 + OL18 + OL19'
+olc.cfa.model <- sem(olc.cfa.syntax, data = olc.df, std.lv = TRUE)
+
+summary(olc.cfa.model)
+```
+```{r}
+parameterEstimates(olc.cfa.model) %>%
+  dplyr::filter(op == '=~') %>% 
+  select(lhs:pvalue) %>% 
+  mutate_if(is.numeric, round, digits = 3)
+```
+```{r}
+fitMeasures(olc.cfa.model, c("chisq", "df", "pvalue"))
+```
+```{r}
+fitMeasures(olc.cfa.model, c("cfi", "tli", "gfi", "rmsea", "srmr"))
+```
+```{r}
+modindices(olc.cfa.model, sort. = TRUE, minimum.value = 3.84)
+```
+```{r}
+modindices(olc.cfa.model, sort. = TRUE, minimum.value = 3.84) %>% 
+  slice(1) %>%
+  mutate_if(is.numeric, round, digits = 3) %>%
+  dplyr::select(lhs:mi)
+```
+
