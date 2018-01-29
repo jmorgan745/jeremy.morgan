@@ -1,0 +1,22 @@
+---
+title: "Untitled"
+output: github_document
+---
+
+```{r}
+library(tidyverse)
+library(readr)
+
+ENT5587.df <- read_csv("http://www.drbanderson.com/data/ENT5587C_Spring2018.csv")
+
+risk.corr.df <- ENT5587.df %>%
+  dplyr::select(RISK1:RISK3)
+
+cor(risk.corr.df)
+```
+
+```{r}
+library(psych)
+alpha(risk.corr.df)
+```
+
