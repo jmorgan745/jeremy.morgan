@@ -44,8 +44,40 @@ eo.df <- eo.ds %>%
 
 ### Specify multidemtional measurement model
 
-* Relfective measurement model
+* Reflective measurement model
 * Arrows from EO to its dimensions (Innovativeness, Pro, RiskTaking)
     * Arrows from the dimensions to its indicators
 * Three indicators per dimension
+
+### Specify Full Unidimensional CFA
+
+We're going to start with a quick distribution check of the EO indicators...
+
+```{r}
+library(skimr)
+
+# Distribution analysis of the indicators
+skim(eo.df)
+```
+
+Seems to be skewed to the more entrepreneurial end of the scale. Might need to watch that.
+
+Next up, a CFA...
+
+```{r}
+library(lavaan)
+
+# Specify unidemsional (nine indicators) CFA syntax
+eo.cfa.full.syntax <- 'EO =~ INN1 + INN2 +INN3 + PRO1 + PRO2 + PRO3 + RISK1 + RISK2 + RISK 3'
+
+# Specify the full CFA
+eo.cfa.full.model <- sem(eo.cfa.full.syntax, data=eo.df, std.lv = TRUE)
+
+summary(eo.cfa.full.model)
+```
+Now lets check the modification indicies and see the source of misspecification
+
+```{r}
+modificationIndices(eo.cfa.full.model, sort = TRUE, minimum.value = 3.84)
+```
 
