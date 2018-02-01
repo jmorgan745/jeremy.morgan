@@ -35,3 +35,17 @@ eo.df <- eo.ds %>%
   na.omit()
 ```
 
+### Specify unidimensional measurement model
+
+* Reflective measurement model
+* Arrows from EO to its indicators
+    * Change in EO reflects in the same way, and same magnitude to its indicators
+* All nine indicators load on a single latent construct
+
+### Specify multidemtional measurement model
+
+* Relfective measurement model
+* Arrows from EO to its dimensions (Innovativeness, Pro, RiskTaking)
+    * Arrows from the dimensions to its indicators
+* Three indicators per dimension
+
