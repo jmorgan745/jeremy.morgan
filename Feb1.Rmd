@@ -1,0 +1,37 @@
+---
+title: "ED Scale Feb 1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+
+### To-Do List
+
+* Load class data
+* Specify our measurement model
+    * Unidimensional
+    * Multidimensional
+* Specify full model (all nine indicators)
+* Reduce the model to
+    * Non-significant Chi-square
+    * No measurement error covariances
+    * Squared lambda greater than .5
+        * Standardized lambda > .7
+        
+        
+### Load Data
+
+```{r}
+library(tidyverse)
+
+# Access course data
+
+eo.ds <- read_csv("http://www.drbanderson.com/data/ENT5587C_Spring2018.csv")
+
+eo.df <- eo.ds %>%
+  dplyr::select(INN1:RISK3) %>% 
+  na.omit()
+```
+
