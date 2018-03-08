@@ -1,0 +1,56 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+ENT5587.df <- read_csv("http://www.drbanderson.com/data/ENT5587C_Spring2018.csv")
+```
+
+```{r}
+library(rstanarm)
+
+risk.seed <- set.seed(08022003)
+
+# Here we are using a GLM approach to estimate a linear model using a Gaussian link function.
+# In rstanarm, using a GLM (versus LM) allows us to set a prior on each model parameter, which
+#  would include the intercept, beta, and the standard error.
+risk.model <- stan_glm(Performance ~ Risk, data = ENT5587.df, 
+                       family = gaussian(link = "identity"), chains = 1, seed = risk.seed)
+```
+```{r}
+prior_summary (risk.model)
+```
+
+```{r}
+print(risk.model, digits = 3)
+```
+
+```{r}
+risk.ci <- posterior_interval(risk.model, prob = 0.95, pars = "Risk")
+round(risk.ci, 3)
+```
+
+```{r}
+summary(lm(Performance ~ Risk, data = ENT5587.df))$coef
+```
+
+```{r}
+risk.model.draws <- as_data_frame(as.matrix(risk.model))
+
+colnames(risk.model.draws)[1:2] <- c("a", "b")
+
+ggplot(ENT5587.df, aes(x = Risk, y = Performance)) + 
+  geom_point() +
+  geom_abline(data = risk.model.draws, aes(intercept = a, slope = b), 
+              color = "skyblue", size = 0.2, alpha = 0.25) + 
+  geom_abline(intercept = coef(risk.model)[1], slope = coef(risk.model)[2], 
+              color = "skyblue4", size = 1) + 
+  theme_bw()
+```
+
+```{r}
+pp_check(risk.model, plotfun = "hist", nreps = 5)
+```
+
