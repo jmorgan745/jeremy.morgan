@@ -1,0 +1,17 @@
+---
+title: "March15"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+ENT5587.df <- read_csv("http://www.drbanderson.com/data/ENT5587C_Spring2018.csv")
+```
+
+```{r}
+ENT5587.df <- ENT5587.df %>% 
+  mutate(real_logFirmAge = log(.01 + logFirmAge))
+
+summary(lm(Performance ~ real_logFirmAge + logEmployees, data = ENT5587.df))$r.squared
+```
+
