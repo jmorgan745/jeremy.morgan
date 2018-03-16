@@ -14,4 +14,82 @@ ENT5587.df <- ENT5587.df %>%
 
 summary(lm(Performance ~ real_logFirmAge + logEmployees, data = ENT5587.df))$r.squared
 ```
+His slide says 3%, but it should say 6%.
+
+```{r}
+library(rstanarm)
+
+# Don't forget to set the see to provide reproducible results
+performance.seed <- set.seed(08022003)
+
+# Specify our model with the median prior for R2 set at .2
+performance.model <- stan_lm(Performance ~ real_logFirmAge + logEmployees, data = ENT5587.df,
+                             prior = R2(location = 0.2, what = "median"), 
+                             chains = 1, seed = performance.seed)
+```
+
+```{r}
+prior_summary(performance.model)
+```
+
+```{r}
+print(performance.model, digits = 3)
+```
+
+```{r}
+summary(lm(Performance ~ real_logFirmAge + logEmployees, data = ENT5587.df))
+```
+
+```{r}
+performance.model.fa.ci <- posterior_interval(performance.model, prob = 0.95, pars = "real_logFirmAge")
+round(performance.model.fa.ci, 3)
+```
+
+```{r}
+library(loo)
+
+# Here we're going to introduce a new syntax to build a new model based on a previous 
+#  model specification. This format makes it easy to quickly compare models.
+performance.fe.model <- update(performance.model, formula = . ~ logEmployees)
+```
+
+```{r}
+performance.model.loo <- loo(performance.model)
+performance.fe.model.loo <- loo(performance.fe.model)
+
+#LOO Information Criteria for model with Age and Employees
+performance.model.loo$looic
+## [1] 1707.205
+# LOO Information Criteria for model with just Employees
+performance.fe.model.loo$looic
+## [1] 1704.277
+# Now make the comparison
+compare_models(performance.model.loo, performance.fe.model.loo)
+```
+
+```{r}
+plot(performance.fe.model.loo, label_points = TRUE)
+```
+
+```{r}
+pp_check(performance.fe.model, plotfun = "hist", nreps = 5)
+```
+
+```{r}
+# First lets create our sequence of values of logEmployees based on the minimum and maximum in the 
+#  data. I'm going to round those values to whole numbers, and then increment the series by .2.
+logEmployees.seq <- seq(from = round(min(ENT5587.df$logEmployees)), 
+                        to = round(max(ENT5587.df$logEmployees)), by = .2)
+
+# Now we pass our new set of values of logEmployees.seq to our model as a new dataframe
+performance.fe.predict <- posterior_predict(performance.fe.model, 
+                                            newdata = data.frame(logEmployees = logEmployees.seq))
+
+# We are going to use base R graphics for this, because of how ggplot requires a specified y axis
+#  for boxplots---there is not much in the way of transformations we need to do using just base R
+boxplot(performance.fe.predict, axes = FALSE, ylim = c(-5, 35),
+        xlab = "Log Employees", ylab = "Predicted Performance", col = "red")
+axis(1, at = 1:ncol(performance.fe.predict), labels = logEmployees.seq, las = 3)
+axis(2, las = 1)
+```
 
