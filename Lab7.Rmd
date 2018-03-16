@@ -1,0 +1,68 @@
+---
+title: "Lab7"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+ENT5587.df <- read_csv("http://www.drbanderson.com/data/ENT5587C_Spring2018.csv")
+```
+
+```{r}
+ENT5587.df <- ENT5587.df %>% 
+  mutate(logRisk = log(.01 + Risk)) %>%
+  mutate(logSellGlobally = log(.01 +SellGlobally))
+
+summary(lm(Performance ~ logRisk + logSellGlobally + logRisk * logSellGlobally, data = ENT5587.df))$r.squared
+```
+````{r}
+library(rstanarm)
+
+# Don't forget to set the see to provide reproducible results
+performance.seed <- set.seed(08022003)
+
+# Specify our model with the median prior for R2 set at .2
+performance.model <- stan_lm(Performance ~ logRisk + logSellGlobally + logRisk * logSellGlobally, data = ENT5587.df,
+                             prior = R2(location = 0.2, what = "median"), 
+                             chains = 1, seed = performance.seed)
+```
+
+```{r}
+prior_summary(performance.model)
+```
+
+```{r}
+print(performance.model, digits = 3)
+```
+
+```{r}
+summary(lm(Performance ~ logRisk + logSellGlobally + logRisk * logSellGlobally, data = ENT5587.df))
+```
+
+```{r}
+performance.fe.model <- update(performance.model, formula = . ~ Risk + SellGlobally)
+```
+
+```{r}
+performance.model.loo <- loo(performance.model)
+performance.fe.model.loo <- loo(performance.fe.model)
+
+#LOO Information Criteria for model with Age and Employees
+performance.model.loo$looic
+## [1] 1707.205
+# LOO Information Criteria for model with just Employees
+performance.fe.model.loo$looic
+## [1] 1704.277
+# Now make the comparison
+compare_models(performance.model.loo, performance.fe.model.loo)
+```
+
+```{r}
+plot(performance.fe.model.loo, label_points = TRUE)
+```
+
+```{r}
+pp_check(performance.fe.model, plotfun = "hist", nreps = 5)
+```
+```
+
