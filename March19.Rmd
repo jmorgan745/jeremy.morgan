@@ -1,0 +1,208 @@
+---
+title: "March 19"
+output: html_document
+---
+```{r}
+library(tidyverse)
+ENT5587_Exp.df <- read_csv("http://www.drbanderson.com/data/ENT5587Experiment.csv")
+
+ENT5587_Exp.df
+```
+
+The five steps of Bayesian analysis…
+
+Specify a prior distribution for θθ (and other unknown parameters)
+
+Specify a joint distribution based on multiplying the prior by the likelihood function
+
+Draw from the posterior distribution to create an estimate for θθ and all other unknown parameters
+
+Evaluate model fit and make changes to the model
+
+Visualize predicted probabilities based on meaningful values of the predictor variables
+
+We are interested in whether having an entrepreneurial manager increases a person’s creativity.
+
+```{r}
+summary(lm(Creativity ~ EntManager, data = ENT5587_Exp.df))
+```
+
+```{r}
+library(rstanarm)
+
+creativity.seed <- set.seed(08022003)
+
+
+creativity.model <- stan_lm(Creativity ~ EntManager * TaskSpecificity, data = ENT5587_Exp.df,
+                            prior = R2(location = 0.2, what = "median"), 
+                            chains = 5, iter = 10000, seed = creativity.seed)
+```
+
+```{r}
+prior_summary(creativity.model)
+```
+
+```{r}
+print(creativity.model, digits = 3)
+```
+
+```{r}
+posterior_interval(creativity.model, prob = 0.95)
+```
+
+```{r}
+creativity.noint.model <- update(creativity.model, formula = . ~ EntManager + TaskSpecificity)
+```
+
+```{r}
+library(loo)
+
+creativity.model.loo <- loo(creativity.model)
+creativity.noint.model.loo <- loo(creativity.noint.model)
+
+creativity.model.loo$looic
+
+creativity.noint.model.loo$looic
+
+compare_models(creativity.model.loo, creativity.noint.model.loo)
+```
+
+```{r}
+pp_check(creativity.noint.model, plotfun = "hist", nreps = 5)
+```
+
+```{r}
+library(bayesplot)
+
+# The first thing we need to do is to store our posterior draws as an array...
+creativity.noint.model.posterior <- as.array(creativity.noint.model)
+
+color_scheme_set("blue")
+mcmc_intervals(creativity.noint.model.posterior, 
+               pars = c("EntManager", "TaskSpecificity")) + 
+  theme_bw()
+```
+
+```{r}
+mcmc_hist(creativity.noint.model.posterior, 
+          pars = c("EntManager", "TaskSpecificity")) + 
+  theme_bw()
+```
+
+```{r}
+# Baseline condition
+baseline.df <- as.data.frame(posterior_predict(creativity.noint.model, 
+                                               newdata = data.frame(EntManager = 0, TaskSpecificity = 0)))
+colnames(baseline.df) <- c("PredProb")
+
+
+# Ent Manager only condition
+entmanag.df <- as.data.frame(posterior_predict(creativity.noint.model, 
+                                               newdata = data.frame(EntManager = 1, TaskSpecificity = 0)))
+colnames(entmanag.df) <- c("PredProb")
+
+# Task specificity only condition
+taskspec.df <- as.data.frame(posterior_predict(creativity.noint.model, 
+                                               newdata = data.frame(EntManager = 0, TaskSpecificity = 1)))
+colnames(taskspec.df) <- c("PredProb")
+
+# Joint condition
+joint.df <- as.data.frame(posterior_predict(creativity.noint.model, 
+                                            newdata = data.frame(EntManager = 1, TaskSpecificity = 1)))
+colnames(joint.df) <- c("PredProb")
+```
+```{r}
+# Get our median predicted probability
+baseline.med.predprob <- round(median(baseline.df$PredProb), 3)
+sub.baseline <- paste0("Median Predicted Probability: ", baseline.med.predprob)
+
+# Now build our plot
+baseline.plot <- ggplot(data = baseline.df, aes(PredProb)) + 
+  geom_histogram() + 
+  geom_vline(xintercept = baseline.med.predprob, linetype = "dashed", 
+             color = "red", size = 1) + 
+  labs(title = "Baseline Model",
+       subtitle = sub.baseline,
+       y = "Posterior Draws",
+       x = "Predicted Probability of Creativity") + 
+  theme_bw()
+```
+```{r}
+# Get our median predicted probability
+entmanag.med.predprob <- round(median(entmanag.df$PredProb), 3)
+sub.entmanag <- paste0("Median Predicted Probability: ", entmanag.med.predprob)
+
+# Now build our plot
+entmanag.plot <- ggplot(data = entmanag.df, aes(PredProb)) + 
+  geom_histogram() + 
+  geom_vline(xintercept = entmanag.med.predprob, linetype = "dashed", 
+             color = "red", size = 1) + 
+  labs(title = "Entrepreneurial Manager Only",
+       subtitle = sub.entmanag,
+       y = "Posterior Draws",
+       x = "Predicted Probability of Creativity") + 
+  theme_bw()
+```
+```{r}
+# Get our median predicted probability
+taskspec.med.predprob <- round(median(taskspec.df$PredProb), 3)
+sub.taskspec <- paste0("Median Predicted Probability: ", taskspec.med.predprob)
+
+# Now build our plot
+taskspec.plot <- ggplot(data = taskspec.df, aes(PredProb)) + 
+  geom_histogram() + 
+  geom_vline(xintercept = taskspec.med.predprob, linetype = "dashed", 
+             color = "red", size = 1) + 
+  labs(title = "Task Specificity Only",
+       subtitle = sub.taskspec,
+       y = "Posterior Draws",
+       x = "Predicted Probability of Creativity") + 
+  theme_bw()
+```
+```{r}
+# Get our median predicted probability
+joint.med.predprob <- round(median(joint.df$PredProb), 3)
+sub.joint <- paste0("Median Predicted Probability: ", joint.med.predprob)
+
+# Now build our plot
+joint.plot <- ggplot(data = joint.df, aes(PredProb)) + 
+  geom_histogram() + 
+  geom_vline(xintercept = joint.med.predprob, linetype = "dashed", 
+             color = "red", size = 1) + 
+  labs(title = "Joint Model",
+       subtitle = sub.joint,
+       y = "Posterior Draws",
+       x = "Predicted Probability of Creativity") + 
+  theme_bw()
+```
+```{r}
+library(gridExtra)
+grid.arrange(baseline.plot, entmanag.plot, taskspec.plot, joint.plot, ncol = 2)
+```
+```{r}
+color_scheme_set("mix-blue-red")
+mcmc_trace(creativity.noint.model.posterior, pars = c("EntManager", "TaskSpecificity"),
+           facet_args = list(ncol = 1, strip.position = "left"))
+```
+
+```{r}
+library(blavaan)
+model <- '# latent variable definitions
+          ind60 =~ x1 + x2 + x3
+          dem60 =~ y1 + a*y2 + b*y3 + c*y4
+          dem65 =~ y5 + a*y6 + b*y7 + c*y8
+     
+          # regressions
+          dem60 ~ ind60
+          dem65 ~ ind60 + dem60
+     
+          # residual correlations
+          y1 ~~ y5
+          y2 ~~ y4 + y6
+          y3 ~~ y7
+          y4 ~~ y8
+          y6 ~~ y8'
+
+fit <- bsem(model, data = PoliticalDemocracy, target = "stan")
+```
+

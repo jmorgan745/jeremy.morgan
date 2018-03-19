@@ -64,5 +64,5 @@ plot(performance.fe.model.loo, label_points = TRUE)
 ```{r}
 pp_check(performance.fe.model, plotfun = "hist", nreps = 5)
 ```
-```
+
 
