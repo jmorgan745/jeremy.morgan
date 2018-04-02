@@ -33,4 +33,27 @@ head(leanstartup.df, 10)
 ggplot(data = leanstartup.df, aes(x = date, y = TheLeanStartup)) + 
   geom_line()
 ```
+```{r}
+library(forecast)
+
+# Our first step is to define a time series object with just our search observations
+leanstartup.ts <- ts(leanstartup.df$TheLeanStartup, frequency = 12)
+leanstartup.ts %>% 
+  decompose %>%  # decompose is a forecast function that seperates the series
+  autoplot  # autoplot returns a gpplot object that we are used to seeing
+```
+```{r}
+blackfriday.df <- gtrends(c('\"Black Friday\"'), geo = c("US"),
+                          time = "2004-01-01 2017-12-31",
+                          gprop = c("web"), hl = "en-US")$interest_over_time
+
+blackfriday.df <- blackfriday.df %>%
+  dplyr::select(date, hits, keyword) %>%
+  mutate(keyword = gsub("\"", "", keyword)) %>% 
+  mutate(date = as_date(date)) %>%
+  arrange(date, keyword) %>%
+  spread(keyword, hits) %>%
+  rename(BlackFriday = "Black Friday") %>% 
+  mutate(BlackFriday = as.numeric(ifelse(BlackFriday == "<1", "0", BlackFriday)))
+```
 
