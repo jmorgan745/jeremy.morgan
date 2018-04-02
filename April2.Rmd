@@ -57,3 +57,221 @@ blackfriday.df <- blackfriday.df %>%
   mutate(BlackFriday = as.numeric(ifelse(BlackFriday == "<1", "0", BlackFriday)))
 ```
 
+```{r}
+ggplot(data = blackfriday.df, aes(x = date, y = BlackFriday)) + 
+  geom_line()
+```
+
+```{r}
+blackfriday.ts <- ts(blackfriday.df$BlackFriday, frequency = 12)
+blackfriday.ts %>% 
+  decompose %>% 
+  autoplot
+```
+```{r}
+# First for The Lean Startup
+leanstartup.dc <- stl(leanstartup.ts, s.window = "period")
+var(leanstartup.dc$time.series[,1])/var(leanstartup.ts)
+## [1] 0.1018443
+# Now for Black Friday
+blackfriday.dc <- stl(blackfriday.ts, s.window = "period")
+var(blackfriday.dc$time.series[,1])/var(blackfriday.ts)
+## [1] 0.7752217
+```
+
+```{r}
+# The Lean Startup trend
+var(leanstartup.dc$time.series[,2])/var(leanstartup.ts)
+## [1] 0.4724057
+# Black Friday trend
+var(blackfriday.dc$time.series[,2])/var(blackfriday.ts)
+## [1] 0.02538101
+```
+
+```{r}
+ggPacf(leanstartup.ts)
+```
+```{r}
+leanstartup.diff.ts <- diff(leanstartup.ts, differences = 1)
+autoplot(leanstartup.diff.ts)
+
+```
+
+```{r}
+leanstartup.df <- leanstartup.df %>% 
+  mutate(Month = month(date))
+```
+
+```{r}
+var(leanstartup.dc$time.series[,1])/var(leanstartup.ts)
+```
+```{r}
+library(modelr)
+
+# Specify our model, and treat Month as a factor (categorical) variable
+leanstartup.model <- lm(TheLeanStartup ~ factor(Month), data = leanstartup.df)
+
+# Now lets store the residual values in our dataframe
+leanstartup.df <- leanstartup.df %>% 
+  add_residuals(leanstartup.model, var = "BaselineResiduals")
+```
+
+```{r}
+ggplot(data = leanstartup.df, aes(x = date, y = BaselineResiduals)) + 
+  geom_line()
+```
+```{r}
+ggplot(data = leanstartup.df, aes(x = date, y = BaselineResiduals)) + 
+  geom_line() + 
+  geom_smooth(se = FALSE)
+```
+```{r}
+leanstartup.df <- leanstartup.df %>% 
+  mutate(Publish = ifelse(date < "2011-09-01", "0", "1"))
+```
+
+```{r}
+leanstartup.pub.model <- update(leanstartup.model, formula = ~ . + Publish)
+
+leanstartup.df <- leanstartup.df %>% 
+  add_residuals(leanstartup.pub.model, var = "PublishResiduals")
+```
+
+```{r}
+ggplot(data = leanstartup.df, aes(x = date, y = PublishResiduals)) + 
+  geom_line() + 
+  geom_smooth(se = FALSE)
+```
+
+```{r}
+# Add a lagged value of our DV as an additional predictor
+leanstartup.lag.model <- update(leanstartup.pub.model, formula = ~ . + lag(TheLeanStartup))
+
+# Add the residuals of this model to the dataframe
+leanstartup.df <- leanstartup.df %>% 
+  add_residuals(leanstartup.lag.model, var = "LagResiduals")
+```
+
+```{r}
+ggplot(data = leanstartup.df, aes(x = date, y = LagResiduals)) + 
+  geom_line() + 
+  geom_smooth(se = FALSE)
+```
+```{r}
+search.terms <- c('\"The Lean Startup\"', '\"The $100 Startup\"', '\"Disciplined Entrepreneurship\"',
+                  '\"The Four Steps to the Epiphany\"', '\"Value Proposition Design\"')
+
+leanmethod.df <- gtrends(search.terms, geo = c("US"),
+                          time = "2011-01-01 2017-12-31",
+                          gprop = c("web"), hl = "en-US")$interest_over_time
+
+# Now for some wrangling...
+leanmethod.df <- leanmethod.df %>%
+  select(date, hits, keyword) %>%
+  mutate(keyword = gsub("\"", "", keyword)) %>% 
+  mutate(date = as_date(date),
+         keyword = as.factor(keyword))
+
+head(leanmethod.df, 10)
+```
+```{r}
+ggplot(data = leanmethod.df, aes(x = date, y = hits, colour = keyword)) + 
+  geom_line()
+```
+```{r}
+leanmethod.df <- leanmethod.df %>%
+  mutate(Publish = case_when(keyword == "The Lean Startup" & date < "2011-09-01" ~ "0",
+                             keyword == "The $100 Startup" & date < "2012-05-01" ~ "0",
+                             keyword == "Disciplined Entrepreneurship" & date < "2013-08-01" ~ "0",
+                             keyword == "The Four Steps to the Epiphany" & date < "2013-07-01" ~ "0",
+                             keyword == "Value Proposition Design" & date < "2014-10-01" ~ "0")) %>% 
+  mutate(Publish = ifelse(is.na(Publish), "1", Publish)) %>% 
+  mutate(Month = month(date))  # And we add our month column
+
+head(leanmethod.df, 10)
+```
+
+```{r}
+leanmethod.nest.df <- leanmethod.df %>% 
+  group_by(keyword) %>% 
+  nest()
+
+group.model <- function(df) {
+  lm(hits ~ factor(Month) + Publish + lag(hits), data = df)
+}
+
+leanmethod.group.model <- leanmethod.nest.df %>% 
+  mutate(model = map(data, group.model),
+         resids = map2(data, model, add_residuals)) %>% 
+  unnest(resids)
+
+leanmethod.group.model
+
+```
+```{r}
+ggplot(data = leanmethod.group.model, aes(x = date, y = resid, colour = keyword)) + 
+  geom_line(alpha = .4) + 
+  geom_smooth(se = FALSE)
+```
+```{r}
+search.term <- c('\"How to be an entrepreneur\"')
+
+us.df <- gtrends(search.term, geo = c("US"),
+                 time = "2011-01-01 2011-12-31",
+                 gprop = c("web"), hl = "en-US")$interest_over_time
+
+in.df <- gtrends(search.term, geo = c("IN"),
+                 time = "2011-01-01 2011-12-31",
+                 gprop = c("web"), hl = "en-US")$interest_over_time
+
+# Now for some wrangling...
+DiD.df <- bind_rows(us.df, in.df, .id = "id") %>%
+  select(date, hits, id) %>%
+  mutate(date = as_date(date),
+         id = as.factor(ifelse(id == 1, "US", "IN")))
+
+head(DiD.df, 10)
+```
+
+```{r}
+ggplot(data = DiD.df, aes(x = date, y = hits, colour = id)) + 
+  geom_line()
+```
+
+```{r}
+DiD.nest.df <- DiD.df %>% 
+  mutate(Week = week(date)) %>% 
+  group_by(id) %>% 
+  nest()
+
+# Note that in a DiD model, we don't include lags of the DV in the timeseries
+group.model <- function(df) {
+  lm(hits ~ factor(Week), data = df)
+}
+
+DiD.group.df <- DiD.nest.df %>% 
+  mutate(model = map(data, group.model),
+         resids = map2(data, model, add_residuals)) %>% 
+  unnest(resids)
+
+DiD.group.df
+```
+
+```{r}
+ggplot(data = DiD.group.df, aes(x = date, y = resid, colour = id)) + 
+  geom_line(alpha = .4) + 
+  geom_smooth(se = FALSE)
+```
+
+```{r}
+DiD.group.df <- DiD.group.df %>% 
+  mutate(treated = ifelse(id == "US", 1, 0),
+         treated.date = ifelse(date >= "2011-09-01", 1, 0))
+
+head(DiD.group.df, 10)
+```
+
+```{r}
+summary(lm(resid ~ treated * treated.date, data = DiD.group.df))$coef
+```
+
