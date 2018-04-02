@@ -1,0 +1,36 @@
+---
+title: "April2"
+output: html_document
+---
+```{r}
+library(gtrendsR)
+
+search.term <- c('\"The Lean Startup\"')
+
+leanstartup.df <- gtrends(search.term, geo = c("US"),
+                          time = "2011-01-01 2017-12-31",
+                          gprop = c("web"), hl = "en-US")$interest_over_time
+
+head(leanstartup.df, 10)
+```
+```{r}
+library(tidyverse)
+library(lubridate)
+
+leanstartup.df <- leanstartup.df %>%
+  dplyr::select(date, hits, keyword) %>%
+  mutate(keyword = gsub("\"", "", keyword)) %>% 
+  mutate(date = as_date(date)) %>%
+  arrange(date, keyword) %>%
+  spread(keyword, hits) %>%
+  rename(TheLeanStartup = "The Lean Startup")
+```
+
+```{r}
+head(leanstartup.df, 10)
+```
+```{r}
+ggplot(data = leanstartup.df, aes(x = date, y = TheLeanStartup)) + 
+  geom_line()
+```
+
