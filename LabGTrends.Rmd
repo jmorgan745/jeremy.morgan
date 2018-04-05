@@ -1,0 +1,43 @@
+---
+title: "GTrendsLab"
+output: html_document
+---
+```{r}
+library(gtrendsR)
+
+search.term <- c('\"Kansas City Royals\"')
+
+royals.df <- gtrends(search.term, geo = c("US"),
+                          time = "2011-01-01 2017-12-31",
+                          gprop = c("web"), hl = "en-US")$interest_over_time
+
+head(royals.df, 10)
+```
+
+```{r}
+library(tidyverse)
+library(lubridate)
+
+royals.df <- royals.df %>%
+  dplyr::select(date, hits, keyword) %>%
+  mutate(keyword = gsub("\"", "", keyword)) %>% 
+  mutate(date = as_date(date)) %>%
+  arrange(date, keyword) %>%
+  spread(keyword, hits) %>%
+  rename(Royals = "Kansas City Royals")
+```
+```{r}
+ggplot(data = royals.df, aes(x = date, y = Royals)) + 
+  geom_line()
+```
+
+```{r}
+library(forecast)
+
+royals.ts <- ts(royals.df$Royals, frequency = 12)
+royals.ts %>% 
+  decompose %>%
+  autoplot
+
+```
+
