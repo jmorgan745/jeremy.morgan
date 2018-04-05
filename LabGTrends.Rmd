@@ -1,6 +1,8 @@
 ---
 title: "GTrendsLab"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 ```{r}
 library(gtrendsR)
@@ -74,10 +76,5 @@ ggplot(data = royals.df, aes(x = date, y = BaselineResiduals)) +
 royals.df <- royals.df %>% 
   mutate(WS = ifelse(date < "2015-09-01" & date > "2016-08-01", "0", "1"))
 ```
-```{r}
-royals.ws.model <- update(royals.model, formula = ~ . + WS)
 
-royals.df <- royals.df %>% 
-  add_residuals(royals.ws.model, var = "WSResiduals")
-```
 
