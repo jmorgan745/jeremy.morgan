@@ -71,10 +71,3 @@ ggplot(data = royals.df, aes(x = date, y = BaselineResiduals)) +
   geom_line() + 
   geom_smooth(se = FALSE)
 ```
-
-```{r}
-royals.df <- royals.df %>% 
-  mutate(WS = ifelse(date < "2015-09-01" & date > "2016-08-01", "0", "1"))
-```
-
-
