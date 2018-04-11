@@ -1,0 +1,117 @@
+---
+title: "April9"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+
+set.seed(08022003)
+
+ts.df <- data_frame(Date = seq.Date(as.Date("2017-01-01"), by = 1, length.out = 100),
+                    x = arima.sim(model = list(ar = 0.999), n = 100),
+                    y = 1.4 * x + rnorm(100)) 
+
+# Now I am going to add a 10 point shift in y after the 70th observation
+treatment.date = ts.df$Date[1] + 70
+ts.df <- ts.df %>% 
+  mutate(y = ifelse(Date >= treatment.date, y + 10, y)) %>% 
+  dplyr::select(Date, y, x)  # Reorder the columns---this is important!
+
+head(ts.df, 10)
+```
+
+```{r}
+ggplot(data = ts.df, aes(y = value, x = Date)) + 
+  geom_line(aes(y = y), colour = 'Red') + 
+  geom_line(aes(y = x), colour = 'Blue')
+```
+
+```{r}
+library(zoo)
+library(CausalImpact)
+
+# First we set our pre- and post- treatment dates
+pre.treatment <- c(ts.df$Date[1], treatment.date - 1)
+post.treatment <- c(treatment.date, ts.df$Date[100])
+
+# Next we convert our dataframe into a time series object using the `zoo` package
+ts.ts <- read.zoo(ts.df)
+
+# Now we specify our model
+ts.model <- CausalImpact(ts.ts, pre.treatment, post.treatment)
+```
+
+```{r}
+plot(ts.model)
+```
+
+```{r}
+summary(ts.model)
+```
+
+```{r}
+summary(ts.model, "report")
+```
+```{r}
+library(gtrendsR)
+library(lubridate)
+library(tidyverse)
+
+search.terms <- c('\"Start a business\"', 
+                  '\"Psychology jobs\"', 
+                  '\"Write a cover letter\"',
+                  '\"What is a business\"')
+
+leanimpact.trends <- gtrends(search.terms, geo = c("US"),
+                             time = "2011-01-01 2011-12-31",
+                             gprop = c("web"), hl = "en-US")$interest_over_time
+
+# Now for some wrangling...
+leanimpact.df <- leanimpact.trends %>%
+  dplyr::select(date, hits, keyword) %>%
+  mutate(keyword = gsub("\"", "", keyword)) %>% 
+  mutate(date = as_date(date),
+         keyword = as.factor(keyword)) %>% 
+  mutate(hits = as.numeric(ifelse(hits == "<1", "0", hits)))
+
+head(leanimpact.df, 10)
+```
+```{r}
+ggplot(data = leanimpact.df, aes(x = date, y = hits, colour = keyword)) + 
+  geom_line()
+```
+
+```{r}
+# Start by defining the treatment date as Sept 2011. Don't let me forget to mention why the
+#  date is 4 Sept for treatment!
+pre.treatment <- as.Date(c("2011-01-02", "2011-08-28"))
+post.treatment <- as.Date(c("2011-09-04", "2011-12-25"))
+
+# Now we create our time series object, but first we convert our dataframe from long to wide
+leanimpact.df <- leanimpact.df %>% 
+  mutate(keyword = gsub(" ", "", keyword)) %>% 
+  spread(keyword, hits) %>% 
+  dplyr::select(date, Startabusiness, everything())
+leanimpact.ts <- read.zoo(leanimpact.df)
+
+# And now for our model
+leanimpact.model <- CausalImpact(leanimpact.ts, pre.treatment, post.treatment)
+```
+
+```{r}
+plot(leanimpact.model)
+```
+
+```{r}
+summary(leanimpact.model)
+```
+
+```{r}
+plot(leanimpact.model$model$bsts.model, "coefficients")
+```
+
