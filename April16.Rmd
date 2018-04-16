@@ -67,3 +67,87 @@ pcgdp.df <- pcgdp.df %>%
 head(pcgdp.df, 10)
 ```
 
+```{r}
+pcgdp.df <- pcgdp.df %>% 
+  rename(Location = GeoFIPS,
+         Location_name = GeoName) %>% 
+  mutate(Location = as.integer(Location),
+         Year = as.integer(Year))
+```
+```{r}
+survive.compare <- survive.df %>% 
+  select(Location, Location_name) %>% 
+  distinct()
+pcgdp.compare <- pcgdp.df %>% 
+  select(Location, Location_name) %>% 
+  distinct()
+all_equal(survive.compare, pcgdp.compare)
+```
+
+```{r}
+skim(survive.df$Year)
+```
+
+```{r}
+skim(pcgdp.df$Year)
+```
+
+```{r}
+survive.df <- survive.df %>% 
+  filter(Year >= 2001)
+```
+
+```{r}
+survive.compare <- survive.df %>% 
+  select(Location, Location_name) %>% 
+  distinct()
+pcgdp.compare <- pcgdp.df %>% 
+  select(Location, Location_name) %>% 
+  distinct()
+all_equal(survive.compare, pcgdp.compare)
+```
+
+```{r}
+head(survive.df, 10)
+```
+
+```{r}
+survive.df <- survive.df %>% 
+  filter(Location > 56)
+```
+```{r}
+survival.df <- inner_join(survive.df, pcgdp.df, by = c("Location", "Year"))
+head(survival.df, 10)
+```
+
+```{r}
+survival.df <- survival.df %>% 
+  select(-Location_name.y) %>% 
+  rename(MSA = Location_name.x) %>% 
+  mutate(as.factor(MSA))
+head(survival.df, 10)
+```
+
+```{r}
+survival.df %>% 
+  count(MSA)
+```
+
+```{r}
+ggplot(survival.df, aes(x=GDP_PC)) +
+  geom_histogram()
+```
+```{r}
+survival.df <- survival.df %>% 
+  mutate(logGDP_PC = log(GDP_PC))
+```
+```{r}
+ggplot(survival.df, aes(x=logGDP_PC)) +
+  geom_histogram()
+```
+```{r}
+ggplot(survival.df, aes(y = Survival_Rate, x = logGDP_PC)) +
+  geom_point() +
+  geom_smooth(method = "loess")
+```
+
