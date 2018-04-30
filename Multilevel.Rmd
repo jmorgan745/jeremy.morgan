@@ -1,0 +1,48 @@
+---
+title: "Multilevel"
+output: html_document
+---
+```{r setup, include = FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+survival.df <- survival.df %>% 
+  group_by(AveGDP = mean(logGDP_PC)) %>% 
+  mutate(cenGDP = logGDP_PC - AveGDP,
+         Year = as.factor(Year))
+```
+
+```{r}
+library(brms)
+library(sjPlot)
+library(sjstats)
+```
+
+```{r}
+my.prior <- set_prior("normal(0,5)", class = "b")
+
+set.seed(08022003)
+dist <- data_frame(beta = rnorm(1000, 0, 5))
+```
+```{r}
+intercept.model <- brm(Survival_Rate ~ (1 | Location),
+                       data = survival.df, chains = 2)
+```
+```{r}
+summary(intercept.model)
+```
+#popultion effect is same as fixed effects
+
+```{r}
+plot_model(intercept.model, type = "re") + 
+  theme_bw()
+```
+```{r}
+icc(intercept.model)
+```
+```{r}
+random_year.model <- brm(Survival_Rate ~ Year + (1 | Location),
+                         data = survival.df, chains = 2, prior = my.prior)
+```
+
