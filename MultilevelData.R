@@ -57,4 +57,9 @@ phtest(fixed.model, random.model)
 
 plmtest(fixed.model, c("time"), type=("bp"))
 
+library(lme4)
+library(lmerTest)
+library(sjstats)
+intercept.model <- lmer(Survival_Rate ~ (1 | Location), data = survival.df)
+summary(intercept.model)
 
