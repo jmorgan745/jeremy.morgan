@@ -45,4 +45,49 @@ icc(intercept.model)
 random_year.model <- brm(Survival_Rate ~ Year + (1 | Location),
                          data = survival.df, chains = 2, prior = my.prior)
 ```
+```{r}
+summary(random_year.model)
+```
+```{r}
+plot_model(random_year.model) +
+  theme_bw()
+```
+
+```{r}
+tidy_stan(random_year.model)
+```
+
+```{r}
+random_fixed.model <- brm(Survival_Rate ~ cenGDP + Year + (1 | Location), data = survival.df, chains = 2, prior = my.prior)
+```
+```{r}
+summary(random_fixed.model)
+```
+```{r}
+plot_model(random_fixed.model) +
+  theme_bw()
+```
+```{r}
+plot_model(random_fixed.model, type = "pred", terms = c("cenGDP")) +
+  theme_bw()
+```
+```{r}
+prior_summary(random_fixed.model)
+```
+```{r}
+hybrid.rf.model <- brm(Survival_Rate ~ cenGDP + AveGDP + Year + (1 | Location), data = survival.df, chains = 2, prior = my.prior)
+```
+
+```{r}
+summary(hybrid.rf.model)
+```
+
+```{r}
+plot_model(hybrid.rf.model) +
+  theme_bw()
+```
+
+```{r}
+
+```
 
